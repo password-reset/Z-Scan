@@ -3,6 +3,12 @@
 
 **Z-Scan** is a tool designed to identify valid files or directories on a web server based on their content-lengths automatically using a [Z-score](https://en.wikipedia.org/wiki/Z-score) statistical measure. Z-Scan can be useful for identifying anomalies in large sets of content-lengths of web pages and can help to filter out the noise when performing file and directory enumeration against web applications or servers and especially useful in cases where an application returns `200 OK` status codes for every request.
 
+## Features
+- Automated statistical analysis of content-lengths for file discovery
+- Some basic WAF/Load Balancer detection
+- Some basic API paths detection in jsparse mode
+- JavaScript/JSON parsing for finding additional valid paths buried in javascript code
+
 ## Install
 
 ```bash
