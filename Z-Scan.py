@@ -547,6 +547,7 @@ if __name__ == "__main__":
 	parser.add_argument("--mode", type=str, default="zscore", help="mode [zscore/standard/jsparse] (default: zscore)")
 	parser.add_argument("--useragent", type=str, help="user agent")
 	parser.add_argument("--noredirects", action='store_true', help="disable redirects")
+	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks")
 	parser.add_argument("-o", "--outfile", required=False, help="output to file")
 
 	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -559,7 +560,7 @@ if __name__ == "__main__":
 	outfile = ""
 	cookie = ""
 	session = requests.Session()
-
+	skip_checks = False
 
 
 	if not args.url.endswith('/'):
@@ -577,6 +578,11 @@ if __name__ == "__main__":
 
 	if args.outfile:
 		outfile = args.outfile
+
+	if args.skipchecks == True:
+
+		skip_checks = True
+
 
 
 
@@ -603,35 +609,40 @@ if __name__ == "__main__":
 			print(f" Need a wordlist for {args.mode} mode")
 			sys.exit()
 
-		print(" Fingerprinting responses. Please wait...")
-		sniff_test_url = args.url.split('/')
-		root_url = '/'.join(sniff_test_url[:3]) + '/'
-		sniff_test_result = sniff_test(root_url, useragent)
-		
-		if sniff_test_result:
+		if skip_checks:
+
 			zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
-
-		else:
-			print(f" {'-'*80}")
-			standard_mode_prompt = input(f"{Fore.YELLOW} Site appears to respond normally. Switch to standard mode? [recommended] y/n: {Style.RESET_ALL}")
-			print(f" {'-'*80}")
 		
-			# switch to standard after sniff test
-			args.mode = "standard"
-
-			if standard_mode_prompt == "y":
-
-				standard_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
-
-				print(" Done...\n")
-			
-			elif standard_mode_prompt == "n":
-
-				args.mode = "zscore"
-
-				print(" OK. Running zscore mode.")
+		else:
+			print(" Fingerprinting responses. Please wait...")
+			sniff_test_url = args.url.split('/')
+			root_url = '/'.join(sniff_test_url[:3]) + '/'
+			sniff_test_result = sniff_test(root_url, useragent)
+		
+			if sniff_test_result:
 				zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
-				print(" Done...\n")
+
+			else:
+				print(f" {'-'*80}")
+				standard_mode_prompt = input(f"{Fore.YELLOW} Site appears to respond normally. Switch to standard mode? [recommended] y/n: {Style.RESET_ALL}")
+				print(f" {'-'*80}")
+			
+				# switch to standard after sniff test
+				args.mode = "standard"
+
+				if standard_mode_prompt == "y":
+
+					standard_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
+
+					print(" Done...\n")
+				
+				elif standard_mode_prompt == "n":
+
+					args.mode = "zscore"
+
+					print(" OK. Running zscore mode.")
+					zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
+					print(" Done...\n")
 
 	else:
 		sys.exit()
