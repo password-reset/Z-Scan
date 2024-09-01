@@ -1,7 +1,7 @@
 ![Z-Scan](https://github.com/user-attachments/assets/fd0781d7-9894-4e41-9500-a82279583848)
 
 
-**Z-Scan** is a tool designed to identify valid files or directories on a web server based on their content-lengths automatically using a [Z-score](https://en.wikipedia.org/wiki/Z-score) statistical measure. Z-Scan can be useful for identifying anomalies in large sets of content-lengths of web pages and can help to filter out the noise when performing file and directory enumeration against web applications or servers and especially useful in cases where an application returns `200 OK` status codes for every request.
+**Z-Scan** is a tool designed to identify valid files on a web server based on their content-lengths automatically using a [Z-score](https://en.wikipedia.org/wiki/Z-score) statistical measure. Z-Scan can be useful for identifying anomalies in large sets of content-lengths of web pages and can help to filter out the noise when performing file and directory enumeration against web applications or servers and especially useful in cases where an application returns `200 OK` status codes for every request.
 
 ## Features
 - Automated statistical analysis of content-lengths for file discovery
@@ -19,9 +19,32 @@ pip install -r requirements.txt
 
 ```bash
 python Z-Scan.py --help
-```
 
-![image](https://github.com/user-attachments/assets/3b790fa6-f5b6-4eb8-b2b3-e57945753baa)
+usage: Z-Scan.py [-h] -u URL [-w WORDLIST] [-t THREADS] [-m METHOD] [-c COOKIE] [--mode MODE]
+                 [--useragent USERAGENT] [--noredirects] [--skipchecks] [-o OUTFILE]
+
+File enumeration using the Z-score statistical measure
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u URL, --url URL     target URL
+  -w WORDLIST, --wordlist WORDLIST
+                        path to wordlist
+  -t THREADS, --threads THREADS
+                        number of threads (default: 1)
+  -m METHOD, --method METHOD
+                        request method [HEAD/GET] (default: HEAD)
+  -c COOKIE, --cookie COOKIE
+                        cookie header (e.g., 'PHPSESSID=1Jh7j...'
+  --mode MODE           mode [zscore/standard/jsparse] (default: zscore)
+  --useragent USERAGENT
+                        user agent
+  --noredirects         disable redirects
+  --skipchecks          skip the zscore fingerprinting checks (force zscore mode)
+  -o OUTFILE, --outfile OUTFILE
+                        output to file
+
+```
 
 
 ## Modes
