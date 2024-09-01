@@ -547,7 +547,7 @@ if __name__ == "__main__":
 	parser.add_argument("--mode", type=str, default="zscore", help="mode [zscore/standard/jsparse] (default: zscore)")
 	parser.add_argument("--useragent", type=str, help="user agent")
 	parser.add_argument("--noredirects", action='store_true', help="disable redirects")
-	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks")
+	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks (force zscore mode)")
 	parser.add_argument("-o", "--outfile", required=False, help="output to file")
 
 	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
