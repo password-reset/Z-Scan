@@ -201,8 +201,6 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 	if randomize:
 		random.shuffle(full_urls)
 
-	print(f" randomized: {randomize} ")
-
 	url_cl_pairs = []
 	
 	with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -319,8 +317,6 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 	
 	if randomize:
 		random.shuffle(full_urls)
-
-	print(f" randomized: {randomize} ")
 
 	with ThreadPoolExecutor(max_workers=num_threads) as executor:
 	
