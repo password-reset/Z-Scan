@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 import time
 from bs4 import BeautifulSoup
 
-version = "0.2"
+version = "0.3"
 colorama.init()
 
 def sniff_test(url, useragent):
@@ -53,22 +53,22 @@ def sniff_test(url, useragent):
 				print(f" {Fore.GREEN}{full_url}{Style.RESET_ALL} | status: {Fore.GREEN}{res.status_code}{Style.RESET_ALL} | server: {Fore.GREEN}{server}{Style.RESET_ALL}")
 				count_200 += 1
 			elif res.status_code == 400:
-				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server:  {Fore.YELLOW}{server}{Style.RESET_ALL}")
+				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server: {Fore.YELLOW}{server}{Style.RESET_ALL}")
 				count_400 += 1
 			elif res.status_code == 403:
-				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server:  {Fore.YELLOW}{server}{Style.RESET_ALL}")
+				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server: {Fore.YELLOW}{server}{Style.RESET_ALL}")
 				count_403 += 1	
 			elif res.status_code == 404:
 				count_404 += 1
 				print(f" {Fore.RED}{full_url}{Style.RESET_ALL} | status: {Fore.RED}{res.status_code}{Style.RESET_ALL} | server: {Fore.RED}{server}{Style.RESET_ALL}")
 			elif res.status_code == 405:
-				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server:  {Fore.YELLOW}{server}{Style.RESET_ALL}")
+				print(f" {Fore.YELLOW}{full_url}{Style.RESET_ALL} | status: {Fore.YELLOW}{res.status_code}{Style.RESET_ALL} | server: {Fore.YELLOW}{server}{Style.RESET_ALL}")
 				count_405 += 1
 			elif res.status_code == 429:
-				print(f" {Fore.RED}{full_url}{Style.RESET_ALL} | status: {Fore.RED}{res.status_code}{Style.RESET_ALL} | server:  {Fore.RED}{server}{Style.RESET_ALL}")
+				print(f" {Fore.RED}{full_url}{Style.RESET_ALL} | status: {Fore.RED}{res.status_code}{Style.RESET_ALL} | server: {Fore.RED}{server}{Style.RESET_ALL}")
 				count_429 += 1
 			else:
-				print(f" {Fore.RED}{full_url}{Style.RESET_ALL} | status: {Fore.RED}{res.status_code}{Style.RESET_ALL} | server:  {Fore.RED}{server}{Style.RESET_ALL}")
+				print(f" {Fore.RED}{full_url}{Style.RESET_ALL} | status: {Fore.RED}{res.status_code}{Style.RESET_ALL} | server: {Fore.RED}{server}{Style.RESET_ALL}")
 		
 		except requests.RequestException as e:
 			print(f" {Fore.RED}Error checking {full_url}: {e}{Style.RESET_ALL}")
@@ -197,7 +197,11 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 
 	fixed_paths = [f"/{path}" if not path.startswith('/') else path for path in paths]
 	full_urls = [base_url.rstrip('/') + path for path in fixed_paths]
-	random.shuffle(full_urls)
+	
+	if randomize:
+		random.shuffle(full_urls)
+
+	print(f" randomized: {randomize} ")
 
 	url_cl_pairs = []
 	
@@ -226,7 +230,7 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 		print(f" Nothing found with {method} method.")
 		print(" Z-Score Results:")
 		print(f" Total URLs Processed: {len(full_urls)}")
-		print(f" Unique Content Lengths Found: {len(set(content_lengths))}")
+		print(f" Unique Content Lengths file: {len(set(content_lengths))}")
 
 		if length_counts:
 			most_common_length, most_common_count = length_counts.most_common(1)[0]
@@ -240,7 +244,7 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 		for url, length in same_lengths:
 			if length in valid_lengths:
 				valid_urls.append(url)
-				print(f" Found: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
+				print(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
 				if outfile:
 					with open(outfile, 'a') as o:
 						o.write(f"{url}\n")
@@ -249,7 +253,7 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 
 		print(f" {'-'*80}")
 		print(f" Total URLs Processed: {len(full_urls)}")
-		print(f" Unique Content Lengths Found: {len(set(content_lengths))}")
+		print(f" Unique Content Lengths file: {len(set(content_lengths))}")
 
 		if length_counts:
 			most_common_length, most_common_count = length_counts.most_common(1)[0]
@@ -312,7 +316,11 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 
 	fixed_paths = [f"/{path}" if not path.startswith('/') else path for path in paths]
 	full_urls = [base_url.rstrip('/') + path for path in fixed_paths]
-	random.shuffle(full_urls)
+	
+	if randomize:
+		random.shuffle(full_urls)
+
+	print(f" randomized: {randomize} ")
 
 	with ThreadPoolExecutor(max_workers=num_threads) as executor:
 	
@@ -325,7 +333,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 				
 				if status_code == 200:
 
-					tqdm.write(f" Found: {Fore.GREEN}{url}{Style.RESET_ALL} | status: {Fore.GREEN}{status_code}{Style.RESET_ALL}")
+					tqdm.write(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | status: {Fore.GREEN}{status_code}{Style.RESET_ALL}")
 
 					if outfile:
 						with open(outfile, 'a') as o:
@@ -346,9 +354,6 @@ def jsparse_mode(domain_url, useragent, outfile):
 	port = f":{parsed_domain.port}" if parsed_domain.port else ""
 	apis = []
 	graphqls = []
-	nextjs = False
-	vuejs = False
-	reactjs = False
 
 	def is_same_domain(url):
 		
@@ -406,7 +411,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 		if "/graphql" in js_url:
 
 			graphqls.append(js_url)
-	
+		
 	
 	all_files = fetch_and_find_files(domain_url)
 
@@ -421,10 +426,10 @@ def jsparse_mode(domain_url, useragent, outfile):
 
 	for file_url in all_files.copy():
 
-		content = requests.get(file_url, headers=headers, allow_redirects=True, timeout=10, verify=False).text
+		js_content = requests.get(file_url, headers=headers, allow_redirects=True, timeout=10, verify=False).text
 		
-		urls_in_file = re.findall(r'(https?://[^\s"\']+)|(/[^"\'\s]+)', content)
-		
+		urls_in_file = re.findall(r'(https?://[^\s"\']+)|(/[^"\'\s]+|"/)', js_content)
+
 		for full_url, rel_path in urls_in_file:
 
 			if full_url:
@@ -456,18 +461,6 @@ def jsparse_mode(domain_url, useragent, outfile):
 		# this is just horrible and needs a complete redo
 		for js_url in list(set(all_files)):
 
-			if "/_next/static/" in js_url:
-
-				nextjs = True
-
-			if "/_nuxt/" in js_url:
-
-				vuejs = True
-
-			if "react" in js_url:
-
-				reactjs = True
-			
 			if ("[" not in js_url 
 				and "webp" not in js_url
 				and "png" not in js_url 
@@ -504,8 +497,9 @@ def jsparse_mode(domain_url, useragent, outfile):
 				and "_next" not in js_url
 				and "chunk" not in js_url
 				and "_nuxt" not in js_url
+				and "react" not in js_url
 				and not js_url.endswith("/")):
-				
+
 				try:
 					
 					res = session.head(js_url, headers=headers, allow_redirects=True, timeout=10, verify=False)
@@ -516,7 +510,6 @@ def jsparse_mode(domain_url, useragent, outfile):
 
 								content_length = int(res.headers.get('content-length', 0))
 								js_url_cl_pairs.append((js_url, content_length))
-
 								check_apis(js_url)
 
 						elif res.status_code == 404:
@@ -524,6 +517,8 @@ def jsparse_mode(domain_url, useragent, outfile):
 							
 						elif res.status_code == 405:
 
+							content_length = int(res.headers.get('content-length', 0))
+							js_url_cl_pairs.append((js_url, content_length))
 							check_apis(js_url)
 
 						elif res.status_code == 502: # gw timeout
@@ -538,16 +533,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 					print(f" error 9: {e}")
 					pass
 
-	if nextjs:
-		print(" Framework: NextJS")
-	if vuejs:
-		print(" Framework: VueJS")
-	if reactjs:
-		print(" Framework: React")
-
 	if js_url_cl_pairs:
-
-		
 
 		content_lengths = [length for url, length in js_url_cl_pairs]
 		length_counts = Counter(content_lengths)
@@ -557,13 +543,12 @@ def jsparse_mode(domain_url, useragent, outfile):
 
 			for url, length in same_lengths:
 
-
 				if url in found_js_files:
 					pass
 
 				else:
 
-					print(f" Found: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
+					print(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
 
 					if outfile:
 
@@ -572,32 +557,32 @@ def jsparse_mode(domain_url, useragent, outfile):
 							o.write(f"{url}\n")
 					else:
 						pass
-			
+
 			if apis:
 				print(f" {'-'*80}")
 				print(" Possible APIs endpoints:")
 				print(f" {'-'*80}")
 				for api in apis:
-					print(f" {Fore.GREEN}{api}{Style.RESET_ALL}")
+					print(f" api: {Fore.GREEN}{api}{Style.RESET_ALL}")
 
 			if graphqls:
 				print(f" {'-'*80}")
 				print(" Possible GraphQL endpoints:")
 				print(f" {'-'*80}")
 				for graphql in graphqls:
-					print(f" Possible GRAPHQL Endpoint ----> {Fore.GREEN}{graphql}{Style.RESET_ALL}")
+					print(f" graphql: {Fore.GREEN}{graphql}{Style.RESET_ALL}")	
 
 		else:
-			print(" Nothing found.")
+			print(" Nothing found.\n")
 			
 	else:
 
 		if "www." not in args.url:
 
-				print(" Nothing found. Try www.")		
+				print(" Nothing found. Try www.\n")		
 		else:		
 		
-			print(" Nothing found.")
+			print(" Nothing found.\n")
 
 
 if __name__ == "__main__":
@@ -623,6 +608,7 @@ if __name__ == "__main__":
 	parser.add_argument("--useragent", type=str, help="user agent")
 	parser.add_argument("--noredirects", action='store_true', help="disable redirects")
 	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks (force zscore mode)")
+	parser.add_argument("--randomize", action='store_true', help="randomize the wordlist")
 	parser.add_argument("-o", "--outfile", required=False, help="output to file")
 
 	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -636,6 +622,7 @@ if __name__ == "__main__":
 	cookie = ""
 	session = requests.Session()
 	skip_checks = False
+	randomize = False
 
 
 	if not args.url.endswith('/'):
@@ -654,10 +641,11 @@ if __name__ == "__main__":
 	if args.outfile:
 		outfile = args.outfile
 
-	if args.skipchecks == True:
-
+	if args.skipchecks:
 		skip_checks = True
 
+	if args.randomize:
+		randomize = True
 
 
 	if args.mode == "jsparse":
