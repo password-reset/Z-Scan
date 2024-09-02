@@ -20,8 +20,8 @@ pip install -r requirements.txt
 ```bash
 python Z-Scan.py --help
 
-usage: Z-Scan.py [-h] -u URL [-w WORDLIST] [-t THREADS] [-m METHOD] [-c COOKIE] [--mode MODE]
-                 [--useragent USERAGENT] [--noredirects] [--skipchecks] [-o OUTFILE]
+usage: Z-Scan.py [-h] -u URL [-w WORDLIST] [-t THREADS] [-m METHOD] [-c COOKIE] [--mode MODE] [--useragent USERAGENT] [--noredirects]
+                 [--skipchecks] [--randomize] [-o OUTFILE]
 
 File enumeration using the Z-score statistical measure
 
@@ -41,9 +41,9 @@ optional arguments:
                         user agent
   --noredirects         disable redirects
   --skipchecks          skip the zscore fingerprinting checks (force zscore mode)
+  --randomize           randomize the wordlist
   -o OUTFILE, --outfile OUTFILE
                         output to file
-
 ```
 
 
