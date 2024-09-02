@@ -344,7 +344,11 @@ def jsparse_mode(domain_url, useragent, outfile):
 	parsed_domain = urlparse(domain_url)
 	base_url = f"{parsed_domain.scheme}://{parsed_domain.netloc}"
 	port = f":{parsed_domain.port}" if parsed_domain.port else ""
-
+	apis = []
+	graphqls = []
+	nextjs = False
+	vuejs = False
+	reactjs = False
 
 	def is_same_domain(url):
 		
@@ -385,7 +389,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 				
 							files.append(urljoin(url, href))
 
-			return [f for f in files if is_same_domain(f)]
+			return [f for f in files if is_same_domain(f) and '.min.' not in f and 'webpack' not in f and 'polyfill' not in f and 'jquery' not in f and 'wp-' not in f and 'vendor' not in f and "theme" not in f]
 		
 		except requests.RequestException as e:
 		
@@ -393,7 +397,17 @@ def jsparse_mode(domain_url, useragent, outfile):
 		
 			sys.exit()
 
+	def check_apis(js_url):
 
+		if "/api" in js_url or "/v1" in js_url or "/v2" in js_url or "/v3" in js_url:
+				
+			apis.append(js_url)
+
+		if "/graphql" in js_url:
+
+			graphqls.append(js_url)
+	
+	
 	all_files = fetch_and_find_files(domain_url)
 
 	if all_files:
@@ -442,6 +456,18 @@ def jsparse_mode(domain_url, useragent, outfile):
 		# this is just horrible and needs a complete redo
 		for js_url in list(set(all_files)):
 
+			if "/_next/static/" in js_url:
+
+				nextjs = True
+
+			if "/_nuxt/" in js_url:
+
+				vuejs = True
+
+			if "react" in js_url:
+
+				reactjs = True
+			
 			if ("[" not in js_url 
 				and "webp" not in js_url
 				and "png" not in js_url 
@@ -452,6 +478,11 @@ def jsparse_mode(domain_url, useragent, outfile):
 				and "svg" not in js_url
 				and "woff" not in js_url
 				and "woff2" not in js_url
+				and "otf" not in js_url
+				and "ttf" not in js_url
+				and "javascript" not in js_url
+				and "polyfill" not in js_url
+				and "theme" not in js_url
 				and "x-" not in js_url
 				and "|" not in js_url
 				and ")" not in js_url 
@@ -467,43 +498,72 @@ def jsparse_mode(domain_url, useragent, outfile):
 				and ">" not in js_url 
 				and "=" not in js_url 
 				and "^" not in js_url
-				and "+" not in js_url):
+				and "+" not in js_url
+				and "$" not in js_url
+				and "%" not in js_url
+				and "_next" not in js_url
+				and "chunk" not in js_url
+				and "_nuxt" not in js_url
+				and not js_url.endswith("/")):
 				
 				try:
 					
-					res = session.get(js_url, headers=headers, allow_redirects=True, timeout=10, verify=False)
-					
-					if res.status_code == 200:
-					
-						content_length = int(res.headers.get('content-length', 0))
-						js_url_cl_pairs.append((js_url, content_length))
+					res = session.head(js_url, headers=headers, allow_redirects=True, timeout=10, verify=False)
 
+					if res.headers.get('content-length') is not None:
+
+						if res.status_code == 200:
+
+								content_length = int(res.headers.get('content-length', 0))
+								js_url_cl_pairs.append((js_url, content_length))
+
+								check_apis(js_url)
+
+						elif res.status_code == 404:
+							pass
+							
+						elif res.status_code == 405:
+
+							check_apis(js_url)
+
+						elif res.status_code == 502: # gw timeout
+							pass
+
+						else:
+
+							pass
+							
 				except Exception as e:
 					
 					print(f" error 9: {e}")
 					pass
 
+	if nextjs:
+		print(" Framework: NextJS")
+	if vuejs:
+		print(" Framework: VueJS")
+	if reactjs:
+		print(" Framework: React")
+
 	if js_url_cl_pairs:
+
+		
 
 		content_lengths = [length for url, length in js_url_cl_pairs]
 		length_counts = Counter(content_lengths)
-		same_lengths = [(url, length) for url, length in js_url_cl_pairs if length_counts[length] <= 2]
+		same_lengths = [(url, length) for url, length in js_url_cl_pairs if length_counts[length] <= 1]
 		
 		if same_lengths:
 
 			for url, length in same_lengths:
 
-				# don't print originally found .js files here
+
 				if url in found_js_files:
 					pass
-				
+
 				else:
 
 					print(f" Found: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
-
-					if "api".lower() in url:
-
-						print(f" Possible API ----> {url}")
 
 					if outfile:
 
@@ -512,6 +572,20 @@ def jsparse_mode(domain_url, useragent, outfile):
 							o.write(f"{url}\n")
 					else:
 						pass
+			
+			if apis:
+				print(f" {'-'*80}")
+				print(" Possible APIs endpoints:")
+				print(f" {'-'*80}")
+				for api in apis:
+					print(f" {Fore.GREEN}{api}{Style.RESET_ALL}")
+
+			if graphqls:
+				print(f" {'-'*80}")
+				print(" Possible GraphQL endpoints:")
+				print(f" {'-'*80}")
+				for graphql in graphqls:
+					print(f" Possible GRAPHQL Endpoint ----> {Fore.GREEN}{graphql}{Style.RESET_ALL}")
 
 		else:
 			print(" Nothing found.")
@@ -583,7 +657,6 @@ if __name__ == "__main__":
 	if args.skipchecks == True:
 
 		skip_checks = True
-
 
 
 
