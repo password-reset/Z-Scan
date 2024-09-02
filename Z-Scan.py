@@ -439,6 +439,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 		print(f" {'-'*80}")
 		print(f" {Fore.YELLOW}Parsing results for paths. May take a moment...{Style.RESET_ALL}")
 
+		# this is just horrible and needs a complete redo
 		for js_url in list(set(all_files)):
 
 			if ("[" not in js_url 
