@@ -63,8 +63,6 @@ This is a vanilla enumeration relying on HTTP 200/404 status codes and does no a
 
 This mode can be used to quickly check for, and identify paths from JavaScript and JSON files pulled from the target domain HTML source. It will issue a GET request to the target URL, parse source code, try and identify JS and JSON files, and from any of those files found, will attempt to parse additional paths related to the target domain. `jsparse` mode will also attempt to identify any API paths it encounters. No wordlist is required for this mode.
 
-![image](https://github.com/user-attachments/assets/f61250c9-4474-45a3-8e75-59b6d72c7203)
-
 ## Usage Examples
 
 Scan `https://example.org` using `paths.txt` and `5` threads using the zscore content-length analysis method (default). The default method for requests is `HEAD`.
