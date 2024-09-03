@@ -21,7 +21,7 @@ from requests_doh import DNSOverHTTPSSession
 version = "0.3"
 colorama.init()
 
-def sniff_test(url, useragent):
+def sniff_test(url, useragent, headers):
 	
 	def gen_rand_path():
 		length = random.randint(3, 17)
@@ -46,7 +46,7 @@ def sniff_test(url, useragent):
 			res = session.get(full_url, timeout=10, allow_redirects=True, headers=headers, verify=False)
 			
 			server = str(res.headers.get('server', ""))
-			
+
 			if server == "":
 				server = "n/a"
 			
@@ -152,15 +152,12 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 			z_scores = [(x - mean) / std_dev for x in content_lengths]
 
 			threshold = 3
-
 			valid_content_lengths = [content_lengths[i] for i in range(len(content_lengths)) if np.abs(z_scores[i]) > threshold]
 
 			return valid_content_lengths
 
 	
 	def do_zs_request(url, method, useragent, allow_redirects, session):
-
-		#print(url)
 		
 		try:
 
@@ -270,7 +267,6 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 	def do_std_request(url, method, useragent, allow_redirects, session):
 
 		try:
-			#print(url)
 
 			if method == "GET":
 				
@@ -631,6 +627,7 @@ if __name__ == "__main__":
 
 	if args.useragent:
 		useragent = args.useragent
+		headers = {'User-Agent': useragent}
 	
 	if args.noredirects:	
 		allow_redirects = False 
@@ -686,7 +683,7 @@ if __name__ == "__main__":
 			print(" Fingerprinting responses. Please wait...")
 			sniff_test_url = args.url.split('/')
 			root_url = '/'.join(sniff_test_url[:3]) + '/'
-			sniff_test_result = sniff_test(root_url, useragent)
+			sniff_test_result = sniff_test(root_url, useragent, headers)
 		
 			if sniff_test_result:
 				zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
