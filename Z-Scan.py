@@ -16,6 +16,7 @@ import re
 from datetime import datetime, timezone
 import time
 from bs4 import BeautifulSoup
+from requests_doh import DNSOverHTTPSSession
 
 version = "0.3"
 colorama.init()
@@ -42,7 +43,7 @@ def sniff_test(url, useragent):
 		try:
 			time.sleep(1)
 			
-			res = requests.get(full_url, timeout=10, allow_redirects=True, headers=headers, verify=False)
+			res = session.get(full_url, timeout=10, allow_redirects=True, headers=headers, verify=False)
 			
 			server = str(res.headers.get('server', ""))
 			
@@ -185,7 +186,9 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 		
 		except requests.RequestException as e:
 			
-			return url, None
+			print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
+			time.sleep(1)
+			pass
 
 
 	mode_details(mode, method, base_url, file_list_path, num_threads, useragent)
@@ -238,6 +241,7 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 	else:
 
 		print("\n Z-Score Results:")
+		
 		valid_urls = []
 		for url, length in same_lengths:
 			if length in valid_lengths:
@@ -299,9 +303,9 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 		
 		except requests.RequestException as e:
 		
-			#print(f"Error fetching {url}: {e}")
-		
-			return url, None
+			print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
+			time.sleep(1)
+			pass
 
 
 	mode_details(mode, method, base_url, file_list_path, num_threads, useragent)
@@ -341,7 +345,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 				print(e)
 			
 
-def jsparse_mode(domain_url, useragent, outfile):
+def jsparse_mode(domain_url, useragent, outfile, session):
 
 	found_js_files = []
 	js_url_cl_pairs = []
@@ -362,7 +366,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 		
 		try:
 		
-			response = requests.get(url, headers=headers, allow_redirects=True, timeout=10, verify=False)
+			response = session.get(url, headers=headers, allow_redirects=True, timeout=10, verify=False)
 			soup = BeautifulSoup(response.text, 'html.parser')
 			
 			scripts = soup.find_all(['script', 'link'])
@@ -422,7 +426,7 @@ def jsparse_mode(domain_url, useragent, outfile):
 
 	for file_url in all_files.copy():
 
-		js_content = requests.get(file_url, headers=headers, allow_redirects=True, timeout=10, verify=False).text
+		js_content = session.get(file_url, headers=headers, allow_redirects=True, timeout=10, verify=False).text
 		
 		urls_in_file = re.findall(r'(https?://[^\s"\']+)|(/[^"\'\s]+|"/)', js_content)
 
@@ -605,6 +609,7 @@ if __name__ == "__main__":
 	parser.add_argument("--noredirects", action='store_true', help="disable redirects")
 	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks (force zscore mode)")
 	parser.add_argument("--randomize", action='store_true', help="randomize the wordlist")
+	parser.add_argument("--doh", action='store_true', help="enable DNS over HTTPS for requests (uses cloudflare)")
 	parser.add_argument("-o", "--outfile", required=False, help="output to file")
 
 	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -616,9 +621,9 @@ if __name__ == "__main__":
 	allow_redirects = True
 	outfile = ""
 	cookie = ""
-	session = requests.Session()
 	skip_checks = False
 	randomize = False
+	doh = False
 
 
 	if not args.url.endswith('/'):
@@ -643,11 +648,17 @@ if __name__ == "__main__":
 	if args.randomize:
 		randomize = True
 
+	if args.doh:
+		doh = True
+		session = DNSOverHTTPSSession(provider='cloudflare-security')
+	else:
+		session = requests.Session()
+
 
 	if args.mode == "jsparse":
 
 		try:
-			jsparse_mode(args.url, useragent, outfile)
+			jsparse_mode(args.url, useragent, outfile, session)
 		except ValueError as e:
 			print(f" Bug: Something went weird with data passed to jsparse_mode(): {e}")
 			sys.exit()
@@ -696,11 +707,11 @@ if __name__ == "__main__":
 				
 				elif standard_mode_prompt == "n":
 
-					args.mode = "zscore"
-
-					print(" OK. Running zscore mode.")
-					zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
-					print(" Done...\n")
+					#args.mode = "zscore"
+					#print(" OK. Running zscore mode.")
+					#zscore_mode(args.url, args.wordlist, args.threads, args.method, args.mode, useragent, outfile)
+					#print(" Done...\n")
+					print(" Nothing to do. Standard mode recommended for this host.\n")
 
 	else:
 		sys.exit()
