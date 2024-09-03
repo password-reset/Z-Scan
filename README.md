@@ -21,7 +21,8 @@ pip install -r requirements.txt
 python Z-Scan.py --help
 
 usage: Z-Scan.py [-h] -u URL [-w WORDLIST] [-t THREADS] [-m METHOD] [-c COOKIE] [--mode MODE]
-                 [--useragent USERAGENT] [--noredirects] [--skipchecks] [--randomize] [-o OUTFILE]
+                 [--useragent USERAGENT] [--noredirects] [--skipchecks] [--randomize] [--doh]
+                 [-o OUTFILE]
 
 File enumeration using the Z-score statistical measure
 
@@ -42,6 +43,7 @@ optional arguments:
   --noredirects         disable redirects
   --skipchecks          skip the zscore fingerprinting checks (force zscore mode)
   --randomize           randomize the wordlist
+  --doh                 enable DNS over HTTPS for requests (uses cloudflare)
   -o OUTFILE, --outfile OUTFILE
                         output to file
 ```
