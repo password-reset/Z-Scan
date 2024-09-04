@@ -623,7 +623,7 @@ if __name__ == "__main__":
 	doh = False
 
 	# TODO
-	add_dns_provider("custom_doh", "https://custom_doh_server/dns-query")
+	#add_dns_provider("custom_doh", "https://custom_doh_server/dns-query")
 
 	if not args.url.endswith('/'):
 		args.url += '/'
