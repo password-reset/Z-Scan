@@ -16,9 +16,9 @@ import re
 from datetime import datetime, timezone
 import time
 from bs4 import BeautifulSoup
-from requests_doh import DNSOverHTTPSSession
+from requests_doh import DNSOverHTTPSSession, add_dns_provider, remove_dns_provider
 
-version = "0.3"
+version = "0.4"
 colorama.init()
 
 def sniff_test(url, useragent, headers):
@@ -138,6 +138,7 @@ def mode_details(mode, method, base_url, file_list_path, num_threads, useragent)
 	print(f" Target: {Fore.YELLOW}{base_url}{Style.RESET_ALL}")
 	print(f" Wordlist: {Fore.YELLOW}{file_list_path}{Style.RESET_ALL}")
 	print(f" Threads: {Fore.YELLOW}{num_threads}{Style.RESET_ALL}")
+	print(f" DoH: {Fore.YELLOW}{doh} {Fore.WHITE} Provider:{Style.RESET_ALL} {Fore.YELLOW}{provider}{Style.RESET_ALL}")
 	print(f" {'-'*80}")
 
 
@@ -613,25 +614,27 @@ if __name__ == "__main__":
 	
 	args = parser.parse_args()
 	useragent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-	headers = {'User-Agent': useragent}
 	allow_redirects = True
 	outfile = ""
 	cookie = ""
+	provider = "n/a"
 	skip_checks = False
 	randomize = False
 	doh = False
 
+	# TODO
+	add_dns_provider("custom_doh", "https://custom_doh_server/dns-query")
 
 	if not args.url.endswith('/'):
 		args.url += '/'
 
 	if args.useragent:
 		useragent = args.useragent
-		headers = {'User-Agent': useragent}
-	
+
 	if args.noredirects:	
 		allow_redirects = False 
 
+	headers = {'User-Agent': useragent}
 	if args.cookie is not None:
 		headers['Cookie'] = args.cookie
 		cookie = args.cookie
@@ -647,7 +650,8 @@ if __name__ == "__main__":
 
 	if args.doh:
 		doh = True
-		session = DNSOverHTTPSSession(provider='cloudflare-security')
+		provider = "cloudflare"
+		session = DNSOverHTTPSSession(provider=provider) # cloudflare, google, opendns
 	else:
 		session = requests.Session()
 
