@@ -8,6 +8,7 @@
 - Some basic WAF/Load Balancer detection
 - Some basic API paths detection in jsparse mode
 - JavaScript/JSON parsing for finding additional valid paths buried in javascript code
+- DNS over HTTPS support
 
 ## Install
 
