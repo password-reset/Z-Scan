@@ -1,7 +1,7 @@
 beautifulsoup4==4.12.3
 colorama==0.4.6
 numpy==1.23.2
-requests==2.31.0
+requests==2.32.3
 requests_doh==0.3.3
 tqdm==4.65.0
 urllib3==2.2.2
