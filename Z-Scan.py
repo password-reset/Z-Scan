@@ -16,7 +16,6 @@ import re
 from datetime import datetime, timezone
 import time
 from bs4 import BeautifulSoup
-from requests_doh import DNSOverHTTPSSession, add_dns_provider, remove_dns_provider
 
 version = "0.4"
 colorama.init()
@@ -138,7 +137,6 @@ def mode_details(mode, method, base_url, file_list_path, num_threads, useragent)
 	print(f" Target: {Fore.YELLOW}{base_url}{Style.RESET_ALL}")
 	print(f" Wordlist: {Fore.YELLOW}{file_list_path}{Style.RESET_ALL}")
 	print(f" Threads: {Fore.YELLOW}{num_threads}{Style.RESET_ALL}")
-	print(f" DoH: {Fore.YELLOW}{doh} {Fore.WHITE} Provider:{Style.RESET_ALL} {Fore.YELLOW}{provider}{Style.RESET_ALL}")
 	print(f" {'-'*80}")
 
 
@@ -360,15 +358,14 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 
 
 	def fetch_and_find_files(url):
-		
+
 		try:
-		
-			response = session.get(url, headers=headers, allow_redirects=True, timeout=10, verify=False)
+			response = session.get(url, headers=headers, allow_redirects=True, timeout=10, verify=False)			
 			soup = BeautifulSoup(response.text, 'html.parser')
 			
 			scripts = soup.find_all(['script', 'link'])
 			files = []
-
+			
 			for tag in scripts:
 				
 				if tag.name == 'script' and 'src' in tag.attrs:
@@ -412,35 +409,46 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 	
 	all_files = fetch_and_find_files(domain_url)
 
+
 	if all_files:
 		
 		print(f" {Fore.GREEN}Found {len(all_files)} JS/JSON file(s) in source at {Style.RESET_ALL}{domain_url}")
 
 		for file in all_files:
-			
-			print(f" {file}")
-			found_js_files.append(file)
+
+			if ".json" in file:
+				print(f" json: {Fore.MAGENTA}{file}{Style.RESET_ALL}")
+				found_js_files.append(file)
+
+			else:
+				print(f" js: {Fore.CYAN}{file}{Style.RESET_ALL}")
+				found_js_files.append(file)
+
+			if "_buildManifest.js" in file:
+				# TODO
+				print(f" Next.js build manifest detected. Parsing for additional paths.")
 
 	for file_url in all_files.copy():
 
 		js_content = session.get(file_url, headers=headers, allow_redirects=True, timeout=10, verify=False).text
 		
+		if "pxAppId" in js_content:
+			print(f" {Fore.RED}PerimeterX anti-bot possibly detected. Quitting.{Style.RESET_ALL}")
+			sys.exit()
+
 		urls_in_file = re.findall(r'(https?://[^\s"\']+)|(/[^"\'\s]+|"/)', js_content)
 
 		for full_url, rel_path in urls_in_file:
 
 			if full_url:
-
 				if is_same_domain(full_url) and full_url not in all_files:
 				
 					all_files.append(full_url)
 			
 			elif rel_path:
-			
 				try:
-			
+
 					full_path = urljoin(base_url + port, rel_path)
-			
 					if is_same_domain(full_path) and full_path not in all_files:
 			
 						all_files.append(full_path)
@@ -451,7 +459,7 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 
 	if all_files:
 
-		session = requests.Session()
+		#session = requests.Session()
 		print(f" {'-'*80}")
 		print(f" {Fore.YELLOW}Parsing results for paths. May take a moment...{Style.RESET_ALL}")
 
@@ -477,7 +485,7 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 				and "|" not in js_url
 				and ")" not in js_url 
 				and "?" not in js_url 
-				and "`" not in js_url 
+				and "`" not in js_url
 				and "," not in js_url 
 				and "}" not in js_url 
 				and "*" not in js_url 
@@ -501,6 +509,11 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 					
 					res = session.head(js_url, headers=headers, allow_redirects=True, timeout=10, verify=False)
 
+					#if res.status_code == 200:
+					#	print(f" checking: {js_url} | {res.status_code}")
+					#else:
+					#	pass
+
 					if res.headers.get('content-length') is not None:
 
 						if res.status_code == 200:
@@ -511,6 +524,12 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 
 						elif res.status_code == 404:
 							pass
+
+						elif res.status_code == 403:
+
+							content_length = int(res.headers.get('content-length', 0))
+							js_url_cl_pairs.append((js_url, content_length))
+							check_apis(js_url)
 							
 						elif res.status_code == 405:
 
@@ -522,7 +541,6 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 							pass
 
 						else:
-
 							pass
 							
 				except Exception as e:
@@ -546,7 +564,6 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 				else:
 
 					print(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | cl: {length}")
-
 					if outfile:
 
 						with open(outfile, 'a') as o:
@@ -575,10 +592,8 @@ def jsparse_mode(domain_url, useragent, outfile, session):
 	else:
 
 		if "www." not in args.url:
-
 				print(" Nothing found. Try www.\n")		
 		else:		
-		
 			print(" Nothing found.\n")
 
 
@@ -606,7 +621,6 @@ if __name__ == "__main__":
 	parser.add_argument("--noredirects", action='store_true', help="disable redirects")
 	parser.add_argument("--skipchecks", action='store_true', help="skip the zscore fingerprinting checks (force zscore mode)")
 	parser.add_argument("--randomize", action='store_true', help="randomize the wordlist")
-	parser.add_argument("--doh", action='store_true', help="enable DNS over HTTPS for requests (uses cloudflare)")
 	parser.add_argument("-o", "--outfile", required=False, help="output to file")
 
 	urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -617,13 +631,10 @@ if __name__ == "__main__":
 	allow_redirects = True
 	outfile = ""
 	cookie = ""
-	provider = "n/a"
 	skip_checks = False
 	randomize = False
-	doh = False
 
-	# TODO
-	#add_dns_provider("custom_doh", "https://custom_doh_server/dns-query")
+	session = requests.Session()
 
 	if not args.url.endswith('/'):
 		args.url += '/'
@@ -648,16 +659,8 @@ if __name__ == "__main__":
 	if args.randomize:
 		randomize = True
 
-	if args.doh:
-		doh = True
-		provider = "cloudflare"
-		session = DNSOverHTTPSSession(provider=provider) # cloudflare, google, opendns
-	else:
-		session = requests.Session()
-
 
 	if args.mode == "jsparse":
-
 		try:
 			jsparse_mode(args.url, useragent, outfile, session)
 		except ValueError as e:
@@ -665,7 +668,6 @@ if __name__ == "__main__":
 			sys.exit()
 
 	elif args.mode == "standard":
-
 		if args.wordlist is None:
 			print(f" Need a wordlist for {args.mode} mode")
 			sys.exit()
@@ -674,7 +676,6 @@ if __name__ == "__main__":
 		print(" Done...\n")
 
 	elif args.mode == "zscore":
-
 		if args.wordlist is None:
 			print(f" Need a wordlist for {args.mode} mode")
 			sys.exit()
