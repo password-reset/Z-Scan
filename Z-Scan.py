@@ -18,6 +18,7 @@ import time
 from bs4 import BeautifulSoup
 
 version = "0.4"
+author = "https://x.com/0rbz_"
 colorama.init()
 
 def sniff_test(url, useragent, headers):
@@ -605,7 +606,7 @@ if __name__ == "__main__":
    ███   █████ ███████ ██      ███████ ██ ██  ██    31   17     73 
   ███               ██ ██      ██   ██ ██  ██ ██ 41   0    1192
  ███████       ███████  ██████ ██   ██ ██   ████    7    121  
- v{version} | https://x.com/0rbz_
+ v{version}
  {'-'*80}"""
 	
 	print(banner)
