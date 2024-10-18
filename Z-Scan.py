@@ -294,8 +294,10 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 			else:
 
 				pass
+				
+			content_length = int(res.headers.get('content-length', 0))
 			
-			return url, status_code
+			return url, content_length, status_code
 		
 		except requests.RequestException as e:
 		
@@ -325,11 +327,11 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 		for future in tqdm(as_completed(future_to_url), total=len(full_urls), leave=False):
 
 			try:
-				url, status_code = future.result()
+				url, content_length, status_code = future.result()
 				
 				if status_code == 200:
 
-					tqdm.write(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | status: {Fore.GREEN}{status_code}{Style.RESET_ALL}")
+					tqdm.write(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | status: {Fore.GREEN}{status_code}{Style.RESET_ALL} | cl: {Fore.GREEN}{content_length}{Style.RESET_ALL}")
 
 					if outfile:
 						with open(outfile, 'a') as o:
