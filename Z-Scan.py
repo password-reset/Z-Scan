@@ -329,7 +329,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 			try:
 				url, content_length, status_code = future.result()
 				
-				if status_code == 200:
+				if status_code == 200 and content_length != 0:
 
 					tqdm.write(f" file: {Fore.GREEN}{url}{Style.RESET_ALL} | status: {Fore.GREEN}{status_code}{Style.RESET_ALL} | cl: {Fore.GREEN}{content_length}{Style.RESET_ALL}")
 
@@ -340,7 +340,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 						pass
 
 			except Exception as e:
-				#print(e)
+				print(f"Error: {e}")
 				pass
 				
 			
