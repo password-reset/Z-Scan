@@ -340,7 +340,9 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 						pass
 
 			except Exception as e:
-				print(e)
+				#print(e)
+				pass
+				
 			
 
 def jsparse_mode(domain_url, useragent, outfile, session):
