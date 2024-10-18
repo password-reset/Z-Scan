@@ -340,7 +340,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 						pass
 
 			except Exception as e:
-				print(f"Error: {e}")
+				#print(f"Error: {e}")
 				pass
 				
 			
