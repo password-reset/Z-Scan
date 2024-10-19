@@ -183,7 +183,7 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 		
 		except requests.RequestException as e:
 			
-			print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
+			#print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
 			time.sleep(1)
 			pass
 
@@ -301,7 +301,7 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 		
 		except requests.RequestException as e:
 		
-			print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
+			#print(f" {Fore.RED}Error: {url} - {e}{Style.RESET_ALL}")
 			time.sleep(1)
 			pass
 
