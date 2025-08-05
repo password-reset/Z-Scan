@@ -16,8 +16,9 @@ import re
 from datetime import datetime, timezone
 import time
 from bs4 import BeautifulSoup
+from urllib3.exceptions import NameResolutionError
 
-version = "0.4"
+version = "0.4.1"
 author = "https://x.com/0rbz_"
 colorama.init()
 
@@ -180,6 +181,10 @@ def zscore_mode(base_url, file_list_path, num_threads, method, mode, useragent, 
 			content_length = int(res.headers.get('content-length', 0))
 
 			return url, content_length
+
+		except NameResolutionError as e:
+		print(f" Name resolution failed: {e}. Exiting.")
+		sys.exit(1)
 		
 		except requests.RequestException as e:
 			
@@ -298,6 +303,10 @@ def standard_mode(base_url, file_list_path, num_threads, method, mode, useragent
 			content_length = int(res.headers.get('content-length', 0))
 			
 			return url, content_length, status_code
+
+		except NameResolutionError as e:
+			print(f" Name resolution failed: {e}. Exiting.")
+			sys.exit(1)
 		
 		except requests.RequestException as e:
 		
@@ -606,7 +615,7 @@ if __name__ == "__main__":
 
 	banner = f"""
  ███████       ███████  ██████  █████  ███    ██ 1   612   0 
-    ███        ██      ██      ██   ██ ████   ██  9     2    42
+	███        ██      ██      ██   ██ ████   ██  9     2    42
    ███   █████ ███████ ██      ███████ ██ ██  ██    31   17     73 
   ███               ██ ██      ██   ██ ██  ██ ██ 41   0    1192
  ███████       ███████  ██████ ██   ██ ██   ████    7    121  
